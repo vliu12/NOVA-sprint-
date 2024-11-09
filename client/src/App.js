@@ -3,31 +3,49 @@ import React, { useState, useRef } from "react";
 function App() {
     const [speed, setSpeed] = useState("medium");
     const [emotion, setEmotion] = useState("calm");
-    const [theme, setTheme] = useState("peaceful visualization");
-    const audioRef = useRef(new Audio());
-    const wsRef = useRef(null);
+    const [mood, setMood] = useState("Anxious");
+    const audioRef = useRef(null);
 
-    const startMeditation = () => {
-        // Initialize WebSocket connection
-        wsRef.current = new WebSocket("ws://localhost:8000/ws/meditation");
-
-        wsRef.current.onopen = () => {
-            // Send parameters to the backend
-            const params = JSON.stringify({ speed, emotion, theme });
-            wsRef.current.send(params);
-        };
-
-        wsRef.current.onmessage = (event) => {
-            // Assuming the backend sends audio chunks as base64
-            const audioBlob = new Blob([event.data], { type: "audio/wav" });
+    const startMeditation = async () => {
+        try {
+            const params = { speed, emotion, mood };
+    
+            const response = await fetch("http://localhost:8000/start-meditation", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(params),
+            });
+    
+            if (!response.ok) {
+                throw new Error("Failed to start meditation");
+            }
+    
+            // Stream audio data
+            const reader = response.body.getReader();
+            const chunks = [];
+    
+            // Read the response stream
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+            }
+    
+            // Combine all chunks into a single blob and play
+            const audioBlob = new Blob(chunks, { type: "audio/wav" });
             const audioURL = URL.createObjectURL(audioBlob);
-            audioRef.current.src = audioURL;
-            audioRef.current.play();
-        };
-
-        wsRef.current.onclose = () => console.log("Connection closed.");
-        wsRef.current.onerror = (error) => console.error("WebSocket error:", error);
+    
+            if (audioRef.current) {
+                audioRef.current.src = audioURL;
+                audioRef.current.play();
+            }
+        } catch (error) {
+            console.error("Error starting meditation:", error);
+        }
     };
+    
 
     return (
         <div className="App">
@@ -52,19 +70,21 @@ function App() {
             </label>
 
             <label>
-                Theme:
+                How are you feeling today?:
                 <input
                     type="text"
-                    value={theme}
-                    onChange={(e) => setTheme(e.target.value)}
-                    placeholder="e.g., peaceful visualization"
+                    value={mood}
+                    onChange={(e) => setMood(e.target.value)}
+                    placeholder="How are you feeling today?"
                 />
             </label>
 
             <button onClick={startMeditation}>Start Meditation</button>
+
+            {/* Audio element to play the meditation audio */}
+            <audio ref={audioRef} controls hidden />
         </div>
     );
 }
 
 export default App;
-

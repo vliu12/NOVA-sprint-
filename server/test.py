@@ -1,14 +1,12 @@
-import json
-from openai import OpenAI
 import os
-import time
+import subprocess
 from cartesia import Cartesia
+from openai import OpenAI
 # from cartesia.tts import OutputFormat_Raw, TtsRequestVoiceSpecifier_Id
 from flask import Flask, request, jsonify, Response
 from dotenv import load_dotenv
 from flask_cors import CORS
-import base64
-import pyaudio
+
 
 app = Flask(__name__)
 CORS(app)
@@ -41,34 +39,30 @@ def generate_meditation_script(speed, emotion, mood):
     meditation_script = response.choices[0].message.content
     return meditation_script
 
+speed = "medium"
+emotion = "joy"
+mood = "anxious"
+transcript = generate_meditation_script(speed, emotion, mood)
 
-@app.route('/start-meditation', methods=['POST'])
-def start_meditation():
-    data = request.json
-    speed = data.get("speed", "medium")
-    emotion = data.get("emotion", "calm")
-    mood = data.get("mood", "peaceful visualization")
+if os.environ.get("CARTESIA_API_KEY") is None:
+    raise ValueError("CARTESIA_API_KEY is not set")
 
-    # Generate the meditation script
-    meditation_script = generate_meditation_script(speed, emotion, mood)
-    print("script generated")
-    print(meditation_script)
-    
-    # Generate TTS audio with Cartesia
-    def generate_audio():
-        tts_response = cartesia_client.tts.bytes(
-            model_id="sonic-english",
-            transcript=meditation_script,
-            voice_id="a0e99841-438c-4a64-b679-ae501e7d6091",  # Example voice ID
-            output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
-        )
-        
-        # Yield audio in chunks
-        for chunk in tts_response:
-            time.sleep(0.1)  # Simulate real-time streaming delay
-            yield chunk
+client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
 
-    return Response(generate_audio(), content_type="audio/wav")
+data = client.tts.bytes(
+    model_id="sonic-english",
+    transcript=transcript,
+    voice_id="a0e99841-438c-4a64-b679-ae501e7d6091",  # Barbershop Man
+    # You can find the supported output_formats at https://docs.cartesia.ai/api-reference/tts/bytes
+    output_format={
+        "container": "wav",
+        "encoding": "pcm_f32le",
+        "sample_rate": 44100,
+    },
+)
 
-if __name__ == "__main__":
-    app.run(port=8000)
+with open("sonic.wav", "wb") as f:
+    f.write(data)
+
+# Play the file
+subprocess.run(["ffplay", "-autoexit", "-nodisp", "sonic.wav"])
