@@ -42,33 +42,34 @@ def generate_meditation_script(speed, emotion, mood):
     return meditation_script
 
 
-@app.route('/start-meditation', methods=['POST'])
-def start_meditation():
+@app.route('/generate-audio', methods=['POST'])
+def generate_audio():
     data = request.json
     speed = data.get("speed", "medium")
     emotion = data.get("emotion", "calm")
     mood = data.get("mood", "peaceful visualization")
 
-    # Generate the meditation script
-    meditation_script = generate_meditation_script(speed, emotion, mood)
-    print("script generated")
-    print(meditation_script)
-    
-    # Generate TTS audio with Cartesia
-    def generate_audio():
-        tts_response = cartesia_client.tts.bytes(
-            model_id="sonic-english",
-            transcript=meditation_script,
-            voice_id="a0e99841-438c-4a64-b679-ae501e7d6091",  # Example voice ID
-            output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
-        )
-        
-        # Yield audio in chunks
-        for chunk in tts_response:
-            time.sleep(0.1)  # Simulate real-time streaming delay
-            yield chunk
+    # Generate meditation script
+    transcript = generate_meditation_script(speed, emotion, mood)
 
-    return Response(generate_audio(), content_type="audio/wav")
+    if os.environ.get("CARTESIA_API_KEY") is None:
+        raise ValueError("CARTESIA_API_KEY is not set")
+
+    client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
+
+    audio_data = client.tts.bytes(
+        model_id="sonic-english",
+        transcript=transcript,
+        voice_id="03496517-369a-4db1-8236-3d3ae459ddf7",  # Example voice ID
+        output_format={
+            "container": "wav",
+            "encoding": "pcm_f32le",
+            "sample_rate": 44100,
+        },
+    )
+
+    # Return the audio stream as a response
+    return Response(audio_data, content_type="audio/wav")
 
 if __name__ == "__main__":
     app.run(port=8000)

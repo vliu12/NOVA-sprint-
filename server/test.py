@@ -43,6 +43,7 @@ speed = "medium"
 emotion = "joy"
 mood = "anxious"
 transcript = generate_meditation_script(speed, emotion, mood)
+print(transcript)
 
 if os.environ.get("CARTESIA_API_KEY") is None:
     raise ValueError("CARTESIA_API_KEY is not set")
@@ -51,8 +52,8 @@ client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
 
 data = client.tts.bytes(
     model_id="sonic-english",
-    transcript=transcript,
-    voice_id="a0e99841-438c-4a64-b679-ae501e7d6091",  # Barbershop Man
+    transcript= transcript,
+    voice_id="03496517-369a-4db1-8236-3d3ae459ddf7",  # Barbershop Man
     # You can find the supported output_formats at https://docs.cartesia.ai/api-reference/tts/bytes
     output_format={
         "container": "wav",

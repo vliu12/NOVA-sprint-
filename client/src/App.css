@@ -1,38 +1,90 @@
+/* App container and basic styling */
 .App {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7f6;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Heading styling */
+h1 {
+  font-size: 2.5rem;
+  color: #4A90E2;
+  margin-bottom: 30px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* Form elements styling */
+label {
+  font-size: 1.1rem;
+  color: #333;
+  margin: 15px 0 5px;
+  display: block;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+/* Dropdown menu and input styling */
+select,
+input[type="text"] {
+  width: 250px;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s ease-in-out;
+}
+
+select:focus,
+input[type="text"]:focus {
+  border-color: #4A90E2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.4);
+}
+
+/* Button styling */
+button {
+  padding: 12px 20px;
+  font-size: 1.2rem;
+  background-color: #4A90E2;
   color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
 }
 
-.App-link {
-  color: #61dafb;
+button:hover {
+  background-color: #357ABD;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Add a subtle box shadow effect to the form */
+.App form {
+  background-color: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+/* Responsive styling for smaller screens */
+@media (max-width: 600px) {
+  h1 {
+      font-size: 2rem;
   }
-  to {
-    transform: rotate(360deg);
+
+  select,
+  input[type="text"] {
+      width: 100%;
+  }
+
+  button {
+      width: 100%;
   }
 }

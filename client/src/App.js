@@ -1,4 +1,6 @@
 import React, { useState, useRef } from "react";
+import './App.css';
+
 
 function App() {
     const [speed, setSpeed] = useState("medium");
@@ -9,34 +11,24 @@ function App() {
     const startMeditation = async () => {
         try {
             const params = { speed, emotion, mood };
-    
-            const response = await fetch("http://localhost:8000/start-meditation", {
+
+            const response = await fetch("http://localhost:8000/generate-audio", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(params),
             });
-    
+
             if (!response.ok) {
                 throw new Error("Failed to start meditation");
             }
-    
-            // Stream audio data
-            const reader = response.body.getReader();
-            const chunks = [];
-    
-            // Read the response stream
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                chunks.push(value);
-            }
-    
-            // Combine all chunks into a single blob and play
-            const audioBlob = new Blob(chunks, { type: "audio/wav" });
+
+            // Stream the audio as a blob
+            const audioBlob = await response.blob();
             const audioURL = URL.createObjectURL(audioBlob);
-    
+
+            // Set the audio source and play
             if (audioRef.current) {
                 audioRef.current.src = audioURL;
                 audioRef.current.play();
@@ -45,11 +37,10 @@ function App() {
             console.error("Error starting meditation:", error);
         }
     };
-    
 
     return (
         <div className="App">
-            <h1>Guided Meditation App</h1>
+            <h1>Meditite</h1>
 
             <label>
                 Speed:
@@ -63,9 +54,9 @@ function App() {
             <label>
                 Emotion:
                 <select value={emotion} onChange={(e) => setEmotion(e.target.value)}>
-                    <option value="calm">Calm</option>
-                    <option value="joy">Joy</option>
-                    <option value="sadness">Sadness</option>
+                    <option value="upbeat">Upbeat</option>
+                    <option value="optimistic">Optimistic</option>
+                    <option value="encouraging">Encouraging</option>
                 </select>
             </label>
 
