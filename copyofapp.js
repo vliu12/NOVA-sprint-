@@ -1,7 +1,5 @@
 import React, { useState, useRef } from "react";
 import './App.css';
-import meditationBackground from './image.png';
-
 
 
 function App() {
@@ -41,24 +39,7 @@ function App() {
     };
 
     return (
-        <div
-        className="App"
-        style={{
-            backgroundImage: `url(${meditationBackground})`,  // Set background image
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-            color: 'white',
-            padding: '20px',
-        }}
-    >
-
-        
+        <div className="App">
             <h1>Meditite</h1>
 
             <label>
